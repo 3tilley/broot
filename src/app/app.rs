@@ -1,3 +1,4 @@
+use chrono::{Utc, DateTime};
 use {
     super::*,
     crate::{
@@ -73,6 +74,9 @@ pub struct App {
 
     /// counter incremented at every draw
     drawing_count: usize,
+
+    /// time of last draw
+    last_redraw: DateTime<Utc>,
 }
 
 impl App {
@@ -113,6 +117,7 @@ impl App {
             tx_seqs,
             rx_seqs,
             drawing_count: 0,
+            last_redraw: Utc::now(),
         };
         if let Some(path) = con.initial_file.as_ref() {
             // open initial_file in preview
@@ -242,6 +247,7 @@ impl App {
                 state_area: panel.areas.state.clone(),
                 app_state,
                 con,
+                last_redraw: self.last_redraw,
             };
             time!(
                 "display panel",
@@ -250,6 +256,7 @@ impl App {
         }
         kitty::manager().lock().unwrap().erase_images_before(w, self.drawing_count)?;
         w.flush()?;
+        self.last_redraw = Utc::now();
         Ok(())
     }
 

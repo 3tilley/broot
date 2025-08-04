@@ -1,14 +1,14 @@
+use chrono::{DateTime, Utc};
 use {
-    super::*,
     crate::{
         command::*,
         display::{
-            status_line,
             Areas,
+            flags_display,
             Screen,
+            status_line,
             W,
             WIDE_STATUS,
-            flags_display,
         },
         errors::ProgramError,
         keys::KEY_FORMAT,
@@ -16,6 +16,7 @@ use {
         task_sync::Dam,
         verb::*,
     },
+    super::*,
     termimad::{
         minimad::{Alignment, Composite},
         TimedEvent,
@@ -200,7 +201,7 @@ impl Panel {
     ) -> Result<(), ProgramError> {
         self.mut_state().display(w, disc)?;
         if disc.active || !WIDE_STATUS {
-            self.write_status(w, disc.panel_skin, disc.screen)?;
+            self.write_status(w, disc.panel_skin, disc.screen, disc.last_redraw)?;
         }
         let mut input_area = self.areas.input.clone();
         if disc.active {
@@ -223,16 +224,20 @@ impl Panel {
         w: &mut W,
         panel_skin: &PanelSkin,
         screen: Screen,
+        last_redraw: DateTime<Utc>,
     ) -> Result<(), ProgramError> {
         let task = self.state().get_pending_task();
-        status_line::write(
-            w,
-            task,
-            &self.status,
-            &self.areas.status,
-            panel_skin,
-            screen,
-        )
+        unsafe {
+            status_line::write(
+                w,
+                task,
+                &self.status,
+                &self.areas.status,
+                panel_skin,
+                screen,
+                last_redraw
+            )
+        }
     }
 
     /// if a panel has a specific purpose (i.e. is here for

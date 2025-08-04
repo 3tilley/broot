@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use {
     super::*,
     crate::{
@@ -17,5 +18,6 @@ pub struct DisplayContext<'c> {
     pub panel_skin: &'c PanelSkin,
     pub app_state: &'c AppState,
     pub con: &'c AppContext,
+    pub last_redraw: DateTime<Utc>,
 }
 
